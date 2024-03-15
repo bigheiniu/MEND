@@ -1,4 +1,4 @@
-# Data Distillation for Efficient In-Context Learning
+# MEND: Meta dEmonstratioN Distillation for Efficient and Effective In-Context Learning
 
 This repository focuses on tools and scripts for data distillation in the context of efficient in-context learning. 
 Our work builds upon the  [MetaICL](https://github.com/facebookresearch/MetaICL) codebase.
