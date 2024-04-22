@@ -10,7 +10,29 @@ from typing import Optional, Tuple, Union
 
 
 
-
+def add_init_prompt_weight(model_config, model, virtual_demo_len, model_args):
+    prompt_init_embedding = nn.Embedding(virtual_demo_len, model_config.hidden_size, dtype=model.dtype)
+    if model_args.virtual_demo_init == "random":
+        if hasattr(model_config, "initializer_range"):
+            init_range = model_config.initializer_range
+        else:
+            try:
+                init_range = model_config.init_std
+            except:
+                init_range = 0.1
+        prompt_init_embedding.weight.data.normal_(mean=0.0, std=init_range)
+    elif model_args.virtual_demo_init == 'vocab':
+        rand_id = torch.randint(100, model_config.vocab_size, (virtual_demo_len,)).long()
+        a = model.get_input_embeddings()
+        print("***ATTENTION Original EMBEDDING SHAPE {}".format(a))
+        rand_id = rand_id.unsqueeze(0)
+        rand_emb = model.get_input_embeddings()(rand_id).squeeze()
+        print("***ATTENTION EMBEDDING SHAPE {}".format((rand_emb.shape)))
+        prompt_init_embedding = prompt_init_embedding.from_pretrained(rand_emb, freeze=False)
+    init_prompt_weight = prompt_init_embedding.weight
+    print("****ATTENTION WEIGHT {}".format(init_prompt_weight.dtype))
+    # print(init_prompt_weight.dtype)
+    return init_prompt_weight
 
 
 class MyGPT2(GPT2Model):
